@@ -2,31 +2,28 @@ package inspect
 
 import (
 	"fmt"
-	"github.com/iamgoroot/dbietool/inspect/gadget"
-	"github.com/iamgoroot/dbietool/models"
-	"github.com/iamgoroot/dbietool/render"
+	"github.com/iamgoroot/dbietool/generator/inspect/inspected"
 	"go/ast"
 	"sort"
 )
 
-func (f *SingleFile) handleOneType(result *render.Result, handler gadget.TypeHandler[models.Entity, *render.Result], gen *ast.GenDecl) {
-	//var run []func()
+func (inspector *Inspector) handleOneType(result *inspected.Result, gen *ast.GenDecl) {
 	for _, spec := range gen.Specs {
-		if ts, ok := spec.(*ast.TypeSpec); ok && contains(f.WithTypes, ts.Name.Name) {
+		if ts, ok := spec.(*ast.TypeSpec); ok {
 			switch typeItem := ts.Type.(type) {
 			case *ast.InterfaceType:
-				f.onInteface(handler, ts, typeItem)
+				inspector.onInteface(ts, typeItem)
 				sort.Slice(typeItem.Methods.List, func(i, j int) bool {
 					return len(typeItem.Methods.List[i].Names) < len(typeItem.Methods.List[j].Names)
 				})
-				entity := &models.Entity{Name: ts.Name.Name}
+				entity := &inspected.Entity{Name: ts.Name.Name}
 				for _, method := range typeItem.Methods.List {
 					if len(method.Names) == 0 {
-						res := f.handleEmdeddedInterfacesAndGetModelName(handler, entity, method)
+						res := inspector.handleEmdeddedInterfacesAndGetModelName(entity, method)
 						result.Merge(res)
 						continue
 					}
-					res := f.handleIntefaceMethod(handler, *entity, method)
+					res := inspector.handleIntefaceMethod(*entity, method)
 					result.Merge(res)
 				}
 			case *ast.IndexExpr:
@@ -36,7 +33,7 @@ func (f *SingleFile) handleOneType(result *render.Result, handler gadget.TypeHan
 	}
 }
 
-func (f *SingleFile) onInteface(handler gadget.TypeHandler[models.Entity, *render.Result], ts *ast.TypeSpec, item *ast.InterfaceType) {
+func (inspector *Inspector) onInteface(ts *ast.TypeSpec, item *ast.InterfaceType) {
 	fmt.Println(ts.Name, ts.Type)
 
 	//switch intf := item.Interface.(type) {
@@ -59,7 +56,7 @@ func (f *SingleFile) onInteface(handler gadget.TypeHandler[models.Entity, *rende
 	}
 
 	////}
-	//e := models.Entity{
+	//e := inspected.Entity{
 	//	MethodName: ts.MethodName.String(),
 	//	//ModelName: ts.MethodName.String(),
 	//}

@@ -3,14 +3,12 @@ package inspect
 import (
 	"bytes"
 	"fmt"
-	"github.com/iamgoroot/dbietool/inspect/gadget"
-	"github.com/iamgoroot/dbietool/models"
-	"github.com/iamgoroot/dbietool/render"
+	"github.com/iamgoroot/dbietool/generator/inspect/inspected"
 	"go/ast"
 )
 
-func (f *SingleFile) handleIntefaceMethod(handler gadget.TypeHandler[models.Entity, *render.Result], entity models.Entity, method *ast.Field) (result *render.Result) {
-	signature := models.Method{
+func (inspector *Inspector) handleIntefaceMethod(entity inspected.Entity, method *ast.Field) *inspected.Result {
+	signature := inspected.Method{
 		Entity: entity,
 	}
 	switch m := method.Type.(type) {
@@ -28,10 +26,10 @@ func (f *SingleFile) handleIntefaceMethod(handler gadget.TypeHandler[models.Enti
 	default:
 		fmt.Println("type", m)
 	}
-	return handler.OnInterfaceMethod(signature)
+	return inspector.OnInterfaceMethod(signature)
 
 }
-func processInParam(r ast.Expr) (param models.Param) {
+func processInParam(r ast.Expr) (param inspected.Param) {
 	switch t := r.(type) {
 	case *ast.Ellipsis:
 		sliceType := processInParam(t.Elt)
@@ -61,7 +59,7 @@ func processInParam(r ast.Expr) (param models.Param) {
 	}
 	return
 }
-func processParam(r ast.Expr) (param models.Param) {
+func processParam(r ast.Expr) (param inspected.Param) {
 	switch t := r.(type) {
 	case *ast.StarExpr:
 	case *ast.Ident:
@@ -72,12 +70,12 @@ func processParam(r ast.Expr) (param models.Param) {
 		return param
 	case *ast.SelectorExpr:
 		if ident, ok := t.X.(*ast.Ident); ok {
-			return models.Param{
+			return inspected.Param{
 				Name: ident.Name,
 				Type: t.Sel.Name,
 			}
 		}
-		return models.Param{
+		return inspected.Param{
 			Type: t.Sel.Name,
 		}
 		//fmt.Println("	return parameter type with import [", i, "] ==>>>", t.X, t.Sel.MethodName)
@@ -88,7 +86,7 @@ func processParam(r ast.Expr) (param models.Param) {
 				if ind, ok := t.Index.(*ast.SelectorExpr); ok {
 					identInd := ind.X.(*ast.Ident)
 					tp := fmt.Sprintf("%s.%s[%s.%s]", ident.String(), val.Sel.Name, identInd.Name, ind.Sel.Name)
-					return models.Param{
+					return inspected.Param{
 						Name:       val.Sel.Name,
 						TypePrefix: "",
 						Type:       tp,
@@ -100,5 +98,5 @@ func processParam(r ast.Expr) (param models.Param) {
 	default:
 		fmt.Println("	defaulted return Param", r)
 	}
-	return models.Param{}
+	return inspected.Param{}
 }

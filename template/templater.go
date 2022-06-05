@@ -1,4 +1,4 @@
-package tr
+package template
 
 import (
 	"bytes"
@@ -52,7 +52,7 @@ func (render templateRenderer[Data]) Import(name string) templateRenderer[Data] 
 
 func (render templateRenderer[Data]) With(data Data) RendererResult {
 	buf := bytes.Buffer{}
-	tmpl, err := template.New("dbie_example").Parse(render.Template)
+	tmpl, err := template.New("dbie").Parse(render.Template)
 	if err != nil {
 		log.Println(err)
 		return nil

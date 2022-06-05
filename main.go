@@ -3,32 +3,23 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/iamgoroot/dbietool/inspect"
-	"github.com/iamgoroot/dbietool/parse"
+	"github.com/iamgoroot/dbietool/generator"
+	"github.com/iamgoroot/dbietool/generator/inspect/handler"
 	"os"
 )
 
 var (
-	typeNames = flag.String("type", "", "comma-separated list of type names; must be set")
-	output    = flag.String("output", "", "output file name")
-	buildTags = flag.String("tags", "", "comma-separated list of build tags to apply")
+	typeNames   = flag.String("type", "", "comma-separated list of type names; must be set?")
+	filePattern = flag.String("filepattern", "%s_generated.go", "output file patten '%s_generated.go'")
 )
 
 func Usage() {
-	fmt.Fprintf(os.Stderr, "Usage of stringer:\n")
-	fmt.Fprintf(os.Stderr, "\tstringer [flags] -type T [directory]\n")
-	fmt.Fprintf(os.Stderr, "\tstringer [flags] -type T files... # Must be a single package\n")
+	fmt.Fprintf(os.Stderr, "Usage of dbietool:\n")
 	flag.PrintDefaults()
 }
 
 func main() {
-	types, tags, args := parseCmd()
-	g := parse.Gocrastinate{
-		FileInspector: func(lookup map[string]string) parse.FileInspector {
-			return &inspect.SingleFile{WithTypes: types}
-		},
-	}
-	dir := pwd(args, tags)
-	g.ParsePackage(args, tags)
-	g.Run(types, dir, *output)
+	types := parseCmd()
+	g := generator.Generator{TypeHandler: handler.DbieToolHandler{}}
+	g.Run(types, pwd(), *filePattern)
 }

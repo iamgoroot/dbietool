@@ -2,17 +2,14 @@ package inspect
 
 import (
 	"fmt"
-	"github.com/iamgoroot/dbietool/inspect/gadget"
-	"github.com/iamgoroot/dbietool/models"
-	"github.com/iamgoroot/dbietool/render"
+	"github.com/iamgoroot/dbietool/generator/inspect/inspected"
 	"go/ast"
 )
 
-func (f *SingleFile) handleEmdeddedInterfacesAndGetModelName(
-	handler gadget.TypeHandler[models.Entity, *render.Result],
-	entity *models.Entity,
+func (inspector *Inspector) handleEmdeddedInterfacesAndGetModelName(
+	entity *inspected.Entity,
 	method *ast.Field,
-) *render.Result {
+) *inspected.Result {
 	switch m := method.Type.(type) {
 	case *ast.IndexExpr:
 		if val, ok := m.X.(*ast.SelectorExpr); ok {
@@ -28,6 +25,5 @@ func (f *SingleFile) handleEmdeddedInterfacesAndGetModelName(
 	default:
 		fmt.Println("type", m)
 	}
-	return handler.OnEmbeddedInterface(*entity)
-
+	return inspector.OnEmbeddedInterface(*entity)
 }

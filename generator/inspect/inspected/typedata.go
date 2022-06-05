@@ -1,4 +1,4 @@
-package models
+package inspected
 
 import "fmt"
 
@@ -25,6 +25,10 @@ type (
 		Op                               string
 		PageParamName                    string
 		SelectTableName                  string
+		OrderBy                          []OrderBy
+	}
+	OrderBy struct {
+		Field, Order string
 	}
 )
 
@@ -34,23 +38,3 @@ func (e Entity) ModelIdent() string {
 	}
 	return fmt.Sprintf("%s.%s", e.ModelPkg, e.ModelName)
 }
-
-//func (e SelectorMethod) ModelIdent() string {
-//	return e.SelectFieldType
-//}
-
-//func (m Method) OutParams() string {
-//	b := strings.Builder{}
-//	for _, param := range m.Out {
-//
-//	}
-//	b.WriteString()
-//}
-
-//func (p Params) out(entityName string) string {
-//	for i, param := range p {
-//		if strings.HasSuffix(param.Type, entityName) {
-//
-//		}
-//	}
-//}
