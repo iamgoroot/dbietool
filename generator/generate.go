@@ -11,6 +11,7 @@ import (
 	"go/format"
 	"io/ioutil"
 	"log"
+	"os"
 	"path/filepath"
 )
 
@@ -60,6 +61,7 @@ func (g *Generator) save(types []string, dir string, src []byte, outputNamePatte
 	}
 	baseName := fmt.Sprintf(outputNamePattern, strcase.ToSnake(types[0]))
 	outputName := filepath.Join(dir, baseName)
+	_ = os.Mkdir(filepath.Dir(outputName), 0750)
 	err := ioutil.WriteFile(outputName, src, 0644)
 	if err != nil {
 		log.Fatalf("writing output: %s", err)
