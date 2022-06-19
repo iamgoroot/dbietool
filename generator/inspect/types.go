@@ -16,7 +16,7 @@ func (inspector *Inspector) handleOneType(result *inspected.Result, gen *ast.Gen
 				sort.Slice(typeItem.Methods.List, func(i, j int) bool {
 					return len(typeItem.Methods.List[i].Names) < len(typeItem.Methods.List[j].Names)
 				})
-				entity := &inspected.Entity{Name: ts.Name.Name}
+				entity := &inspected.Entity{Name: ts.Name.Name, Pkg: result.Pkg}
 				for _, method := range typeItem.Methods.List {
 					if len(method.Names) == 0 {
 						res := inspector.handleEmdeddedInterfacesAndGetModelName(entity, method)

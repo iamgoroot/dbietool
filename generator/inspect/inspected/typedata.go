@@ -4,7 +4,7 @@ import "fmt"
 
 type (
 	Entity struct {
-		Name                             string
+		Name, Pkg                        string
 		ModelName, ModelPkg, ModelImport string
 	}
 
