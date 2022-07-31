@@ -3,6 +3,7 @@ package inspect
 import (
 	"fmt"
 	"github.com/iamgoroot/dbietool/generator/inspect/inspected"
+	"github.com/iamgoroot/dbietool/template"
 	"go/ast"
 	"go/token"
 	"path/filepath"
@@ -11,6 +12,7 @@ import (
 
 type merger[T any] interface{ Merge(T) T }
 type TypeHandler[Result merger[Result]] interface {
+	Once() template.RendererResult
 	OnEmbeddedInterface(entity inspected.Entity) Result
 	OnInterfaceMethod(method inspected.Method) Result
 }

@@ -15,7 +15,7 @@ import (
 	"github.com/iamgoroot/dbie"
 )
 
-type User struct { //model defined as bun model. since bun is only core for now 
+type User struct { //model defined as core model. since core is only core for now 
 	ID       int    `pg:",pk,autoincrement"`
 	Name     string `pg:"name"`
 	LastName string `pg:"last_name"`

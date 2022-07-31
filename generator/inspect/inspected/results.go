@@ -10,20 +10,20 @@ import (
 
 type Result struct {
 	Pkg          string
-	Renderers    merge.Slice[template.RendererResult]
+	Snippets     merge.Slice[template.RendererResult]
 	ImportLookup merge.Map[string, string]
 	Imports      merge.Map[string, bool]
 }
 
 func (r *Result) Merge(rr *Result) *Result {
-	r.Renderers.Merge(rr.Renderers)
+	r.Snippets.Merge(rr.Snippets)
 	r.ImportLookup.Merge(rr.ImportLookup)
 	r.Imports = r.Imports.Merge(rr.Imports)
 	return r
 }
 
 func (r *Result) Add(res ...template.RendererResult) {
-	r.Renderers = append(r.Renderers, res...)
+	r.Snippets = append(r.Snippets, res...)
 }
 
 func (r *Result) ImportByName(name string) *Result {
@@ -46,14 +46,14 @@ func (r *Result) ImportByName(name string) *Result {
 	return r
 }
 
-func (r Result) GetRenderers() []template.RendererResult {
-	sort.Slice(r.Renderers, func(i, j int) bool {
-		return r.Renderers[i].Weight() < r.Renderers[j].Weight() &&
-			r.Renderers[i].ID() < r.Renderers[j].ID()
+func (r Result) GetSnippets() []template.RendererResult {
+	sort.Slice(r.Snippets, func(i, j int) bool {
+		return r.Snippets[i].Weight() < r.Snippets[j].Weight() &&
+			r.Snippets[i].ID() < r.Snippets[j].ID()
 	})
 
 	//?TODO: handle dup result id ?
-	return r.Renderers
+	return r.Snippets
 }
 func (r Result) GetImports() map[string]string {
 	imports := map[string]string{}

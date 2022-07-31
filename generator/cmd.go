@@ -1,25 +1,11 @@
-package main
+package generator
 
 import (
 	"flag"
 	"log"
 	"os"
 	"path/filepath"
-	"strings"
 )
-
-func parseCmd() []string {
-	log.SetFlags(0)
-	log.SetPrefix("dbietool: ")
-	flag.Usage = Usage
-	flag.Parse()
-	if len(*typeNames) == 0 {
-		flag.Usage()
-		os.Exit(2)
-	}
-	types := strings.Split(*typeNames, ",")
-	return types
-}
 
 func pwd() string {
 	args := flag.Args()
