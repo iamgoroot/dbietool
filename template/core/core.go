@@ -45,7 +45,7 @@ func New{{ . }}{{ $entity.Name }}(ctx context.Context, db `+dbObjectIdent+`) {{ 
 {{- if eq .Opts.Constr "factory" -}}
 {{ $entity := . }}
 {{range .Opts.Cores }}
-func (factory {{ . }}) New{{ . }}{{ $entity.Name }}(ctx context.Context) {{ $entity.Name }} {
+func (factory {{ . }}) New{{ $entity.Name }}(ctx context.Context) {{ $entity.Name }} {
 	return {{ $entity.Name | printf $entity.Opts.TypeNamePattern }}{ Repo: core{{ . }}.New[{{ $entity.ModelIdent}}](ctx, factory.DB) }
 }
 {{ end -}}
