@@ -8,7 +8,6 @@ import (
 	"github.com/iamgoroot/dbietool/template"
 	"go/ast"
 	"go/format"
-	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
@@ -87,7 +86,7 @@ func (g *generator) fmt(src []byte) []byte {
 func (g *generator) save(src []byte, output string) {
 	outputName := filepath.Join(pwd(), output)
 	_ = os.Mkdir(filepath.Dir(outputName), 0750)
-	err := ioutil.WriteFile(outputName, src, 0644)
+	err := os.WriteFile(outputName, src, 0644)
 	if err != nil {
 		log.Fatalf("writing output: %s", err)
 	}
