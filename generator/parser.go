@@ -36,7 +36,6 @@ func (g *generator) parsePackageSources() {
 
 func (g *generator) addPackage(pkg *packages.Package) {
 	g.goPackage = &goPackage{
-		Name:  pkg.Name,
 		Defs:  pkg.TypesInfo.Defs,
 		Files: make([]*gofile, len(pkg.Syntax)),
 	}

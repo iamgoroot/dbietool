@@ -9,10 +9,9 @@ import (
 )
 
 var (
-	output = flag.String("output", "generated.go", "output file name")
-	cores  = flag.String("core", "Bun", "core: Bun,Gorm,Beego")
-	constr = flag.String("constr", "factory", "constr: factory,func")
-
+	output          = flag.String("output", "generated.go", "output file name")
+	cores           = flag.String("core", "Bun", "core: Bun,Gorm,Beego")
+	constr          = flag.String("constr", "factory", "constr: factory,func")
 	typeNamePattern = flag.String("typeName", "%sImpl", "type name pattern")
 )
 

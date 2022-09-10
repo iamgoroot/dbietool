@@ -33,13 +33,16 @@ func New(typeHandler inspect.TypeHandler[*inspected.Result]) Generator {
 }
 
 func (g *generator) Out(output string) error {
-	src := g.inspectAndGenerate(&inspected.Result{})
+	src, errs := g.inspectAndGenerate(&inspected.Result{})
+	if len(errs) > 0 {
+		log.Fatalln(errs)
+	}
 	src = g.fmt(src)
 	g.save(src, output)
 	return nil //TODO: err handling
 }
 
-func (g *generator) inspectAndGenerate(results *inspected.Result) []byte {
+func (g *generator) inspectAndGenerate(results *inspected.Result) ([]byte, []error) {
 	inspector := inspect.Inspector{TypeHandler: g.TypeHandler, ImportLookup: results.ImportLookup}
 	for _, file := range g.Files {
 		if file.File != nil {
@@ -57,12 +60,16 @@ func (g *generator) inspectAndGenerate(results *inspected.Result) []byte {
 	return generateSrc(results)
 }
 
-func generateSrc(result *inspected.Result) []byte {
+func generateSrc(result *inspected.Result) ([]byte, []error) {
 	resultBuf := bytes.Buffer{}
+	var errs []error
 	for _, snippet := range result.GetSnippets() {
 		resultBuf.Write(snippet.Bytes())
+		if err := snippet.Error(); err != nil {
+			errs = append(errs, err)
+		}
 	}
-	return resultBuf.Bytes()
+	return resultBuf.Bytes(), errs
 }
 
 func (g *generator) fmt(src []byte) []byte {

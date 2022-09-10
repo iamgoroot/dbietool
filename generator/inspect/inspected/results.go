@@ -16,9 +16,11 @@ type Result struct {
 }
 
 func (r *Result) Merge(rr *Result) *Result {
-	r.Snippets.Merge(rr.Snippets)
-	r.ImportLookup.Merge(rr.ImportLookup)
-	r.Imports = r.Imports.Merge(rr.Imports)
+	if rr != nil {
+		r.Snippets.Merge(rr.Snippets)
+		r.ImportLookup.Merge(rr.ImportLookup)
+		r.Imports = r.Imports.Merge(rr.Imports)
+	}
 	return r
 }
 
@@ -48,11 +50,8 @@ func (r *Result) ImportByName(name string) *Result {
 
 func (r *Result) GetSnippets() []template.RendererResult {
 	sort.Slice(r.Snippets, func(i, j int) bool {
-		return r.Snippets[i].Weight() < r.Snippets[j].Weight() &&
-			r.Snippets[i].ID() < r.Snippets[j].ID()
+		return r.Snippets[i].Weight() < r.Snippets[j].Weight()
 	})
-
-	//?TODO: handle dup result id ?
 	return r.Snippets
 }
 func (r *Result) GetImports() map[string]string {

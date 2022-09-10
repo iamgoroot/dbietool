@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/iancoleman/strcase"
 	"hash/fnv"
-	"log"
 	"strings"
 	"text/template"
 )
@@ -39,6 +38,7 @@ type RendererResult interface {
 	Weight() int
 	ID() string
 	Imports() []string
+	Error() error
 }
 
 type templateRenderer[Data any] struct {
@@ -82,16 +82,11 @@ func (render templateRenderer[Data]) With(data Data) RendererResult {
 			"toDelimited":  strcase.ToDelimited,
 		},
 		).Parse(render.Template)
-	if err != nil {
-		log.Println(err)
-		return nil
-	}
-	err = tmpl.Execute(&buf, data)
-	if err != nil {
-		log.Println(err)
-		return nil
+	if err == nil {
+		err = tmpl.Execute(&buf, data)
 	}
 	return templateRendererResult[Data]{
+		Err:      err,
 		bytes:    buf.Bytes(),
 		weight:   render.Weight,
 		uniqueID: fmt.Sprint(data, hash(render.Template)),
@@ -109,6 +104,11 @@ type templateRendererResult[Data any] struct {
 	bytes    []byte
 	weight   int
 	imports  []string
+	Err      error
+}
+
+func (t templateRendererResult[Data]) Error() error {
+	return t.Err
 }
 
 func (t templateRendererResult[Data]) Imports() []string {
