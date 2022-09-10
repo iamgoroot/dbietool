@@ -9,6 +9,7 @@ const dbObjectIdent = `
 	{{- if eq . "Bun" }} *bun.DB{{ end -}}
 	{{- if eq . "Gorm" }} *gorm.DB{{ end -}}
 	{{- if eq . "Bee" }} orm.Ormer{{ end -}}
+	{{- if eq . "Pg" }} *pg.DB{{ end -}}
 `
 
 var Factory = template.Tr[inspected.Opts](template.AtConstructor, `
