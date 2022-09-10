@@ -46,7 +46,7 @@ func (r *Result) ImportByName(name string) *Result {
 	return r
 }
 
-func (r Result) GetSnippets() []template.RendererResult {
+func (r *Result) GetSnippets() []template.RendererResult {
 	sort.Slice(r.Snippets, func(i, j int) bool {
 		return r.Snippets[i].Weight() < r.Snippets[j].Weight() &&
 			r.Snippets[i].ID() < r.Snippets[j].ID()
@@ -55,7 +55,7 @@ func (r Result) GetSnippets() []template.RendererResult {
 	//?TODO: handle dup result id ?
 	return r.Snippets
 }
-func (r Result) GetImports() map[string]string {
+func (r *Result) GetImports() map[string]string {
 	imports := map[string]string{}
 	for k, v := range r.Imports {
 		if v {
