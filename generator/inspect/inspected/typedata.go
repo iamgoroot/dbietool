@@ -4,9 +4,11 @@ import "fmt"
 
 type (
 	Entity struct {
+		Opts
 		Name, Pkg                        string
 		ModelName, ModelPkg, ModelImport string
 	}
+	Opts map[string]interface{}
 
 	Method struct {
 		Entity

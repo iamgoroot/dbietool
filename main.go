@@ -2,24 +2,33 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"github.com/iamgoroot/dbietool/generator"
 	"github.com/iamgoroot/dbietool/generator/inspect/handler"
-	"os"
+	"log"
+	"strings"
 )
 
 var (
-	typeNames   = flag.String("type", "", "comma-separated list of type names; must be set?")
-	filePattern = flag.String("filepattern", "%s_generated.go", "output file patten '%s_generated.go'")
+	output          = flag.String("output", "generated.go", "output file name")
+	cores           = flag.String("core", "Bun", "core: Bun,Gorm,Beego")
+	constr          = flag.String("constr", "factory", "constr: factory,func")
+	typeNamePattern = flag.String("typeName", "%sImpl", "type name pattern")
 )
 
-func Usage() {
-	fmt.Fprintf(os.Stderr, "Usage of dbietool:\n")
-	flag.PrintDefaults()
-}
-
 func main() {
-	types := parseCmd()
-	g := generator.Generator{TypeHandler: handler.DbieToolHandler{}}
-	g.Run(types, pwd(), *filePattern)
+	flag.Parse()
+
+	err := generator.New(
+		handler.DbieToolHandler{
+			Opts: map[string]interface{}{
+				"Cores":           strings.Split(*cores, ","),
+				"Constr":          *constr,
+				"TypeNamePattern": *typeNamePattern,
+			},
+		},
+	).Out(*output)
+
+	if err != nil {
+		log.Fatalln(err)
+	}
 }

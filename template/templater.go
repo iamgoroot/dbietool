@@ -3,8 +3,9 @@ package template
 import (
 	"bytes"
 	"fmt"
+	"github.com/iancoleman/strcase"
 	"hash/fnv"
-	"log"
+	"strings"
 	"text/template"
 )
 
@@ -37,6 +38,7 @@ type RendererResult interface {
 	Weight() int
 	ID() string
 	Imports() []string
+	Error() error
 }
 
 type templateRenderer[Data any] struct {
@@ -52,17 +54,39 @@ func (render templateRenderer[Data]) Import(name string) templateRenderer[Data] 
 
 func (render templateRenderer[Data]) With(data Data) RendererResult {
 	buf := bytes.Buffer{}
-	tmpl, err := template.New("dbie").Parse(render.Template)
-	if err != nil {
-		log.Println(err)
-		return nil
-	}
-	err = tmpl.Execute(&buf, data)
-	if err != nil {
-		log.Println(err)
-		return nil
+	tmpl, err := template.New("dbie").
+		Funcs(map[string]any{
+			"toTitle":      strings.ToTitle,
+			"toLower":      strings.ToLower,
+			"toUpper":      strings.ToUpper,
+			"trim":         strings.Trim,
+			"split":        strings.Split,
+			"join":         strings.Join,
+			"replace":      strings.Replace,
+			"replaceAll":   strings.ReplaceAll,
+			"repeat":       strings.Repeat,
+			"contains":     strings.Contains,
+			"containsAny":  strings.ContainsAny,
+			"containsRune": strings.ContainsRune,
+			"count":        strings.Count,
+			"hasPrefix":    strings.HasPrefix,
+			"hasSuffix":    strings.HasSuffix,
+			"index":        strings.Index,
+			"indexAny":     strings.IndexAny,
+			"lastIndex":    strings.LastIndex,
+			"lastIndexAny": strings.LastIndexAny,
+			"toCamel":      strcase.ToCamel,
+			"toSnake":      strcase.ToSnake,
+			"toKebab":      strcase.ToKebab,
+			"toLowerCamel": strcase.ToLowerCamel,
+			"toDelimited":  strcase.ToDelimited,
+		},
+		).Parse(render.Template)
+	if err == nil {
+		err = tmpl.Execute(&buf, data)
 	}
 	return templateRendererResult[Data]{
+		Err:      err,
 		bytes:    buf.Bytes(),
 		weight:   render.Weight,
 		uniqueID: fmt.Sprint(data, hash(render.Template)),
@@ -80,6 +104,11 @@ type templateRendererResult[Data any] struct {
 	bytes    []byte
 	weight   int
 	imports  []string
+	Err      error
+}
+
+func (t templateRendererResult[Data]) Error() error {
+	return t.Err
 }
 
 func (t templateRendererResult[Data]) Imports() []string {

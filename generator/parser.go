@@ -19,12 +19,12 @@ type goPackage struct {
 	Files []*gofile
 }
 
-func (g *Generator) parsePackageSources(patterns ...string) {
+func (g *generator) parsePackageSources() {
 	cfg := &packages.Config{
 		Mode:  packages.NeedSyntax | packages.NeedTypesInfo | packages.NeedImports | packages.NeedTypes,
 		Tests: false,
 	}
-	pkgs, err := packages.Load(cfg, patterns...)
+	pkgs, err := packages.Load(cfg)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -34,9 +34,8 @@ func (g *Generator) parsePackageSources(patterns ...string) {
 	g.addPackage(pkgs[0])
 }
 
-func (g *Generator) addPackage(pkg *packages.Package) {
+func (g *generator) addPackage(pkg *packages.Package) {
 	g.goPackage = &goPackage{
-		Name:  pkg.Name,
 		Defs:  pkg.TypesInfo.Defs,
 		Files: make([]*gofile, len(pkg.Syntax)),
 	}

@@ -6,28 +6,42 @@ import (
 	"github.com/iamgoroot/dbietool/generator/inspect"
 	"github.com/iamgoroot/dbietool/generator/inspect/inspected"
 	"github.com/iamgoroot/dbietool/template"
-	"github.com/iancoleman/strcase"
 	"go/ast"
 	"go/format"
-	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
 )
 
-type Generator struct {
+type generator struct {
 	inspect.TypeHandler[*inspected.Result]
 	*goPackage
 }
 
-func (g *Generator) Run(types []string, dir string, outputPattern string) {
-	g.parsePackageSources()
-	src := g.inspectAndGenerate(&inspected.Result{})
-	src = g.fmt(src)
-	g.save(types, dir, src, outputPattern)
+type Generator interface {
+	Out(string) error
 }
 
-func (g *Generator) inspectAndGenerate(results *inspected.Result) []byte {
+func New(typeHandler inspect.TypeHandler[*inspected.Result]) Generator {
+	g := generator{
+		TypeHandler: typeHandler,
+		goPackage:   nil,
+	}
+	g.parsePackageSources()
+	return &g
+}
+
+func (g *generator) Out(output string) error {
+	src, errs := g.inspectAndGenerate(&inspected.Result{})
+	if len(errs) > 0 {
+		log.Fatalln(errs)
+	}
+	src = g.fmt(src)
+	g.save(src, output)
+	return nil //TODO: err handling
+}
+
+func (g *generator) inspectAndGenerate(results *inspected.Result) ([]byte, []error) {
 	inspector := inspect.Inspector{TypeHandler: g.TypeHandler, ImportLookup: results.ImportLookup}
 	for _, file := range g.Files {
 		if file.File != nil {
@@ -40,11 +54,25 @@ func (g *Generator) inspectAndGenerate(results *inspected.Result) []byte {
 	results.Add(
 		template.Header.With(results.Pkg),
 		template.Import.With(results.GetImports()),
+		inspector.TypeHandler.Once(),
 	)
-	return g.generateSrc(results)
+	return generateSrc(results)
 }
 
-func (g *Generator) fmt(src []byte) []byte {
+func generateSrc(result *inspected.Result) ([]byte, []error) {
+	resultBuf := bytes.Buffer{}
+	var errs []error
+	for _, snippet := range result.GetSnippets() {
+		resultBuf.Write(snippet.Bytes())
+		if err := snippet.Error(); err != nil {
+			errs = append(errs, err)
+		}
+	}
+	return resultBuf.Bytes(), errs
+}
+
+func (g *generator) fmt(src []byte) []byte {
+	fmt.Println("generated:\n", string(src))
 	fm, err := format.Source(src)
 	fmt.Println("formatted:\n", string(fm))
 	if err != nil {
@@ -55,23 +83,11 @@ func (g *Generator) fmt(src []byte) []byte {
 	return src
 }
 
-func (g *Generator) save(types []string, dir string, src []byte, outputNamePattern string) {
-	if outputNamePattern == "" {
-		outputNamePattern = "%_generated.go"
-	}
-	baseName := fmt.Sprintf(outputNamePattern, strcase.ToSnake(types[0]))
-	outputName := filepath.Join(dir, baseName)
+func (g *generator) save(src []byte, output string) {
+	outputName := filepath.Join(pwd(), output)
 	_ = os.Mkdir(filepath.Dir(outputName), 0750)
-	err := ioutil.WriteFile(outputName, src, 0644)
+	err := os.WriteFile(outputName, src, 0644)
 	if err != nil {
 		log.Fatalf("writing output: %s", err)
 	}
-}
-
-func (g *Generator) generateSrc(result *inspected.Result) []byte {
-	resultBuf := bytes.Buffer{}
-	for _, snippet := range result.GetRenderers() {
-		resultBuf.Write(snippet.Bytes())
-	}
-	return resultBuf.Bytes()
 }
