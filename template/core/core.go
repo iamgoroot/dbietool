@@ -37,7 +37,7 @@ var Constr = template.Tr[inspected.Entity](template.AtConstructor, `
 {{ $entity := . }}
 {{range .Opts.Cores }}
 func New{{ . }}{{ $entity.Name }}(ctx context.Context, db `+dbObjectIdent+`) {{ $entity.Name }} {
-	return {{ $entity.Name | printf $entity.Opts.TypeNamePattern }}{ Repo: core{{ . }}.New{{ . }}[{{ $entity.ModelIdent}}](ctx, db) }
+	return {{ $entity.Name | printf $entity.Opts.TypeNamePattern }}{ Repo: core{{ . }}.New[{{ $entity.ModelIdent}}](ctx, db) }
 }
 {{ end }}
 {{ end -}}
