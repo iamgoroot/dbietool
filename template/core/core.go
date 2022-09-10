@@ -12,6 +12,16 @@ const dbObjectIdent = `
 	{{- if eq . "Pg" }} *pg.DB{{ end -}}
 `
 
+var CoreImport = template.Tr[inspected.Opts](template.AtImport, `
+{{- range .Cores }}
+	core{{ . }} "github.com/iamgoroot/dbie/core/{{ . | toSnake }}"
+	{{ if eq . "Bun" }}"github.com/uptrace/bun"{{ end -}}
+	{{ if eq . "Gorm" }}"gorm.io/gorm"{{ end -}}
+	{{ if eq . "Bee" }}"github.com/beego/beego/v2/client/orm"{{ end -}}
+	{{ if eq . "Pg" }}"github.com/go-pg/pg/v10"{{ end -}}
+{{- end -}}
+`)
+
 var Factory = template.Tr[inspected.Opts](template.AtConstructor, `
 {{- if eq .Constr "factory" }}
 {{range .Cores }}
@@ -40,15 +50,6 @@ func (factory {{ . }}) New{{ . }}{{ $entity.Name }}(ctx context.Context) {{ $ent
 }
 {{ end -}}
 {{ end -}}
-`)
-
-var CoreImport = template.Tr[inspected.Opts](template.AtImport, `
-{{- range .Cores }}
-	core{{ . }} "github.com/iamgoroot/dbie/core/{{ . | toSnake }}"
-	{{ if eq . "Bun" }}"github.com/uptrace/bun"{{ end -}}
-	{{ if eq . "Gorm" }}"gorm.io/gorm"{{ end -}}
-	{{ if eq . "Bee" }}"github.com/beego/beego/v2/client/orm"{{ end -}}
-{{- end -}}
 `)
 
 var Struct = template.Tr[inspected.Entity](template.AtTypes, `
