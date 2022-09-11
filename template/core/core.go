@@ -10,7 +10,7 @@ const dbObjectIdent = `
 	{{- if eq . "Gorm" }} *gorm.DB{{ end -}}
 	{{- if eq . "Bee" }} orm.Ormer{{ end -}}
 	{{- if eq . "Pg" }} *pg.DB{{ end -}}
-	{{- if eq . "Mongo" }} *mongo.Client{{ end -}}
+	{{- if eq . "Mongo" }}DB *mongo.Client{{ end -}}
 `
 
 var CoreImport = template.Tr[inspected.Opts](template.AtImport, `
