@@ -10,6 +10,7 @@ const dbObjectIdent = `
 	{{- if eq . "Gorm" }} *gorm.DB{{ end -}}
 	{{- if eq . "Bee" }} orm.Ormer{{ end -}}
 	{{- if eq . "Pg" }} *pg.DB{{ end -}}
+	{{- if eq . "Mongo" }} *mongo.Client{{ end -}}
 `
 
 var CoreImport = template.Tr[inspected.Opts](template.AtImport, `
@@ -19,6 +20,7 @@ var CoreImport = template.Tr[inspected.Opts](template.AtImport, `
 	{{ if eq . "Gorm" }}"gorm.io/gorm"{{ end -}}
 	{{ if eq . "Bee" }}"github.com/beego/beego/v2/client/orm"{{ end -}}
 	{{ if eq . "Pg" }}"github.com/go-pg/pg/v10"{{ end -}}
+	{{ if eq . "Mongo" }}"go.mongodb.org/mongo-driver/mongo"{{ end -}}
 {{- end -}}
 `)
 
